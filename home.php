@@ -71,7 +71,9 @@ $program = $conn->query("SELECT * FROM program_kerja ORDER BY tahun_mulai ASC LI
         <h5 class="card-title"><?= htmlspecialchars($b['judul']) ?></h5>
         <p class="card-text"><?= substr(strip_tags($b['isi']),0,150) ?>...</p>
         <a href="<a href="berita_detail.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-primary">Baca Selengkapnya</a>
-" class="btn btn-sm btn-primary">Baca Selengkapnya</a>
+           " class="btn btn-sm btn-primary">Baca Selengkapnya</a>
+        <a href="berita_list.php" class="btn btn-outline-primary">Lihat Semua Berita</a>
+
       </div>
     </div>
   <?php endwhile; ?>
