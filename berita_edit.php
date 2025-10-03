@@ -19,8 +19,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $tanggal=$_POST['tanggal'] ?: date('Y-m-d');
 
     if($judul && $isi){
-        $stmt=$conn->prepare("UPDATE berita SET judul=?, isi=?, tanggal=? WHERE id=?");
-        $stmt->bind_param('sssi',$judul,$isi,$tanggal,$id);
+        $stmt=$conn->prepare("UPDATE berita SET judul=?, isi=?, tanggal=?, kategori=? WHERE id=?");
+        $stmt->bind_param('ssssi',$judul,$isi,$tanggal,$kategori,$id);
         if($stmt->execute()) $ok=true; else $err='Gagal update';
         $stmt->close();
 
@@ -51,6 +51,16 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   <?php if($ok): ?><div class="alert alert-success">Berhasil diupdate.</div><?php endif; ?>
 
   <form method="post">
+      <div class="mb-3">
+       <label class="form-label">Kategori</label>
+       <select class="form-control" name="kategori" required>
+         <option value="Umum" <?= ($row['kategori']=="Umum"?"selected":"") ?>>Umum</option>
+         <option value="Pendidikan" <?= ($row['kategori']=="Pendidikan"?"selected":"") ?>>Pendidikan</option>
+         <option value="Ekonomi" <?= ($row['kategori']=="Ekonomi"?"selected":"") ?>>Ekonomi</option>
+         <option value="Sosial" <?= ($row['kategori']=="Sosial"?"selected":"") ?>>Sosial</option>
+         <option value="Politik" <?= ($row['kategori']=="Politik"?"selected":"") ?>>Politik</option>
+       </select>
+    </div>
     <div class="mb-3"><label class="form-label">Judul</label>
       <input class="form-control" name="judul" value="<?= htmlspecialchars($row['judul']) ?>" required>
     </div>
