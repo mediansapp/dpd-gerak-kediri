@@ -3,6 +3,39 @@ require 'config.php';
 
 // --- Pencarian ---
 $keyword = isset($_GET['q']) ? trim($_GET['q']) : "";
+if($keyword || $kategori){
+    $sql = "SELECT * FROM berita WHERE 1=1";
+    $params = [];
+    $types = "";
+
+    if($keyword){
+        $sql .= " AND (judul LIKE ? OR isi LIKE ?)";
+        $like = "%$keyword%";
+        $params[] = &$like;
+        $params[] = &$like;
+        $types .= "ss";
+    }
+    if($kategori){
+        $sql .= " AND kategori = ?";
+        $params[] = &$kategori;
+        $types .= "s";
+    }
+
+    $sqlTotal = str_replace("SELECT *","SELECT COUNT(*) as total",$sql);
+    $stmtTotal = $conn->prepare($sqlTotal);
+    if($params) call_user_func_array([$stmtTotal,"bind_param"], array_merge([$types], $params));
+    $stmtTotal->execute();
+    $total = $stmtTotal->get_result()->fetch_assoc()['total'];
+    $stmtTotal->close();
+
+    $sql .= " ORDER BY tanggal DESC LIMIT ?,?";
+    $params[] = &$offset;
+    $params[] = &$limit;
+    $types .= "ii";
+
+    $stmt = $conn->prepare($sql);
+    call_user_func_array([$stmt,"bind_param"], array_merge([$types], $params));
+} 
 
 // --- Pagination ---
 $limit = 5; // jumlah berita per halaman
@@ -52,6 +85,21 @@ $res = $stmt->get_result();
 <div class="container my-5">
   <h2>Daftar Berita</h2>
   <hr>
+<?php
+$kategori = isset($_GET['kategori']) ? $_GET['kategori'] : "";
+?>
+<form method="get" class="mb-4 d-flex">
+  <input type="text" name="q" class="form-control me-2" placeholder="Cari berita..." value="<?= htmlspecialchars($keyword) ?>">
+  <select name="kategori" class="form-select me-2" style="max-width:200px;">
+    <option value="">Semua Kategori</option>
+    <option <?= $kategori=="Pendidikan"?"selected":"" ?>>Pendidikan</option>
+    <option <?= $kategori=="Ekonomi"?"selected":"" ?>>Ekonomi</option>
+    <option <?= $kategori=="Sosial"?"selected":"" ?>>Sosial</option>
+    <option <?= $kategori=="Politik"?"selected":"" ?>>Politik</option>
+    <option <?= $kategori=="Umum"?"selected":"" ?>>Umum</option>
+  </select>
+  <button type="submit" class="btn btn-primary">Cari</button>
+</form>
 
   <!-- Form Pencarian -->
   <form method="get" class="mb-4 d-flex">
