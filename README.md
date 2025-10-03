@@ -1,25 +1,122 @@
-# dpd-gerak-kediri
-DPD ORMAS GERAKAN RAKYAT KEDIRI 
+## 📄 README.md
+
 # 🌐 Website DPD Gerakan Rakyat Kota Kediri
 
-Aplikasi berbasis PHP & MySQL untuk manajemen organisasi **DPD Gerakan Rakyat Kota Kediri**.  
-Website ini berfungsi sebagai sistem informasi organisasi, pengelolaan pengurus, berita, kontak, dan program kerja.
+Aplikasi website berbasis **PHP + MySQL** untuk organisasi **DPD Gerakan Rakyat Kota Kediri**.  
+Website ini berfungsi sebagai portal informasi publik dan sistem manajemen internal pengurus.
 
----
-
-## 📌 Fitur Utama
-- **Login Admin** (manajemen akses).
-- **CRUD Pengurus**  
-  Tambah, edit, hapus data pengurus (nama, jabatan, identitas, hp, pasfoto).
-- **CRUD Berita**  
-  Tambah, edit, hapus berita organisasi.
-- **Kontak**  
-  Menerima pesan dari masyarakat, tampil di admin panel.
-- **Program Kerja DPD**  
-  - Tabel Jangka Pendek & Jangka Panjang (5 tahun ke depan).  
-  - Timeline visual program kerja.
-- **Responsive Design** dengan Bootstrap 5.
-
----
+## ✨ Fitur Utama
+- **Home Page** → Profil singkat & informasi organisasi.
+- **Berita**
+  - Tambah/Edit/Hapus berita (admin)
+  - Daftar berita terbaru & detail berita (publik)
+  - Pencarian berita
+  - Filter kategori berita
+  - Arsip berita per tahun
+- **Pengurus**
+  - Data pengurus (nama, jabatan, identitas, no HP, pasfoto)
+  - CRUD pengurus untuk admin
+- **Program Kerja**
+  - Jangka pendek & jangka panjang
+  - Timeline 5 tahun ke depan
+- **Kontak**
+  - CRUD kontak organisasi
+  - Form publik untuk masyarakat
 
 ## 📂 Struktur Folder
+
+dpd-gerak-kediri/
+│── config.php           # Konfigurasi database
+│── home.php             # Halaman utama
+│── berita_list.php      # Daftar berita + filter + pagination
+│── berita_detail.php    # Detail berita
+│── kategori.php         # Filter berita berdasarkan kategori
+│── arsip.php            # Arsip berita berdasarkan tahun
+│── pengurus.php         # Data pengurus
+│── program_kerja.php    # Program kerja & timeline
+│── kontak.php           # Kontak organisasi
+│
+├── /admin               # CRUD untuk admin (berita, pengurus, kontak, program kerja)
+├── /assets              # CSS, JS, gambar, logo
+└── /sql/create_database.sql   # File SQL database
+
+## ⚙️ Instalasi Lokal
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/mediansapp/dpd-gerak-kediri.git
+cd dpd-gerak-kediri
+````
+
+### 2. Setup Server
+
+* Install **XAMPP** / **Laragon**
+* Pindahkan folder `dpd-gerak-kediri` ke:
+
+  * `htdocs/` (XAMPP)
+  * atau `www/` (Laragon)
+
+### 3. Import Database
+
+* Buka `http://localhost/phpmyadmin`
+* Buat database baru: `dpd_gerak_kediri`
+* Import file: `/sql/create_database.sql`
+
+### 4. Konfigurasi `config.php`
+
+<?php
+$host = "localhost";
+$user = "root";     // default user MySQL
+$pass = "";         // default password kosong
+$db   = "dpd_gerak_kediri";
+$conn = new mysqli($host, $user, $pass, $db);
+if($conn->connect_error){
+    die("Koneksi gagal: " . $conn->connect_error);
+}
+?>
+
+### 5. Jalankan Aplikasi
+
+* Start Apache & MySQL dari XAMPP/Laragon
+* Akses di browser:
+
+```
+http://localhost/dpd-gerak-kediri/home.php
+```
+
+## 🚀 Deploy ke Hosting Gratis
+
+GitHub tidak bisa langsung menjalankan PHP.
+Gunakan hosting gratis seperti:
+
+* [InfinityFree](https://infinityfree.net)
+* [000Webhost](https://www.000webhost.com)
+* [ByetHost](https://byet.host)
+
+### Langkah:
+
+1. Upload semua file project ke hosting
+2. Buat database MySQL di hosting
+3. Import `create_database.sql`
+4. Ubah `config.php` sesuai kredensial hosting:
+
+   <?php
+   $host = "sqlxxx.epizy.com";
+   $user = "epiz_123456";
+   $pass = "passwordAnda";
+   $db   = "epiz_123456_dpd";
+   <?/>
+   
+6. Akses via domain/subdomain dari hosting.
+
+## 👨‍💻 Kontributor
+
+* **Ketua DPD Gerakan Rakyat Kota Kediri**
+* **Tim IT & Dokumentasi**
+
+## 📜 Lisensi
+
+Aplikasi ini dibuat untuk keperluan internal organisasi DPD Gerakan Rakyat Kota Kediri.
+Penggunaan di luar organisasi membutuhkan izin tertulis dari pengurus.
+
+
