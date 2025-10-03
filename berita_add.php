@@ -10,8 +10,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $tanggal=$_POST['tanggal'] ?: date('Y-m-d');
 
     if($judul && $isi){
-        $stmt=$conn->prepare("INSERT INTO berita (judul,isi,tanggal) VALUES (?,?,?)");
-        $stmt->bind_param('sss',$judul,$isi,$tanggal);
+        $stmt=$conn->prepare("INSERT INTO berita (kategori,judul,isi,tanggal) VALUES (?,?,?,?)");
+        $stmt->bind_param('ssss',$judul,$isi,$tanggal,$kategori);
         if($stmt->execute()) $ok=true; else $err='Gagal simpan';
         $stmt->close();
     } else {
@@ -35,6 +35,17 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   <?php if($ok): ?><div class="alert alert-success">Berhasil disimpan.</div><?php endif; ?>
 
   <form method="post">
+    <div class="mb-3">
+    <label class="form-label">Kategori</label>
+      <select class="form-control" name="kategori" required>
+         <option value="Umum">Umum</option>
+         <option value="Pendidikan">Pendidikan</option>
+         <option value="Ekonomi">Ekonomi</option>
+         <option value="Sosial">Sosial</option>
+         <option value="Politik">Politik</option>
+      </select>
+    </div>
+
     <div class="mb-3"><label class="form-label">Judul</label><input class="form-control" name="judul" required></div>
     <div class="mb-3"><label class="form-label">Isi Berita</label><textarea class="form-control" name="isi" rows="6" required></textarea></div>
     <div class="mb-3"><label class="form-label">Tanggal</label><input type="date" class="form-control" name="tanggal" value="<?= date('Y-m-d') ?>"></div>
