@@ -1,0 +1,121 @@
+<?php
+require 'config.php';
+
+// Ambil daftar tahun unik dari berita
+$thnRes = $conn->query("SELECT DISTINCT YEAR(tanggal) as tahun FROM berita ORDER BY tahun DESC");
+$tahunList = [];
+while($row = $thnRes->fetch_assoc()){
+    $tahunList[] = $row['tahun'];
+}
+
+// Ambil tahun dari URL
+$tahun = isset($_GET['tahun']) ? (int)$_GET['tahun'] : 0;
+
+// Pagination
+$limit = 5;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if($page < 1) $page = 1;
+$offset = ($page - 1) * $limit;
+
+$total = 0;
+$res = null;
+
+if($tahun){
+    // Hitung total berita per tahun
+    $stmtTotal = $conn->prepare("SELECT COUNT(*) as total FROM berita WHERE YEAR(tanggal)=?");
+    $stmtTotal->bind_param("i", $tahun);
+    $stmtTotal->execute();
+    $total = $stmtTotal->get_result()->fetch_assoc()['total'];
+    $stmtTotal->close();
+
+    $totalPages = ceil($total / $limit);
+
+    // Ambil data berita
+    $stmt = $conn->prepare("SELECT * FROM berita WHERE YEAR(tanggal)=? ORDER BY tanggal DESC LIMIT ?,?");
+    $stmt->bind_param("iii", $tahun, $offset, $limit);
+    $stmt->execute();
+    $res = $stmt->get_result();
+}
+?>
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Arsip Berita <?= $tahun ? $tahun : '' ?> - DPD Gerakan Rakyat Kota Kediri</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="home.php">DPD Gerakan Rakyat Kota Kediri</a>
+  </div>
+</nav>
+
+<div class="container my-5">
+  <div class="row">
+    <!-- Sidebar Tahun -->
+    <aside class="col-md-3 mb-4">
+      <h5>Arsip Tahun</h5>
+      <ul class="list-group">
+        <?php foreach($tahunList as $th): ?>
+          <li class="list-group-item <?= $tahun==$th?'active':'' ?>">
+            <a href="arsip.php?tahun=<?= $th ?>" class="text-decoration-none <?= $tahun==$th?'text-white':'' ?>">
+              <?= $th ?>
+            </a>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+    </aside>
+
+    <!-- Konten Arsip -->
+    <main class="col-md-9">
+      <h2>Arsip Berita <?= $tahun ? $tahun : '' ?></h2>
+      <hr>
+
+      <?php if(!$tahun): ?>
+        <p>Silakan pilih tahun pada sidebar untuk melihat arsip berita.</p>
+      <?php elseif($total == 0): ?>
+        <p>Tidak ada berita pada tahun ini.</p>
+      <?php else: ?>
+        <?php while($b=$res->fetch_assoc()): ?>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title"><?= htmlspecialchars($b['judul']) ?></h5>
+              <small class="text-muted"><?= date("d M Y", strtotime($b['tanggal'])) ?> | <?= $b['kategori'] ?></small>
+              <p class="card-text mt-2"><?= substr(strip_tags($b['isi']),0,200) ?>...</p>
+              <a href="berita_detail.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-primary">Baca Selengkapnya</a>
+            </div>
+          </div>
+        <?php endwhile; ?>
+
+        <!-- Pagination -->
+        <nav>
+          <ul class="pagination justify-content-center">
+            <?php if($page > 1): ?>
+              <li class="page-item"><a class="page-link" href="?tahun=<?= $tahun ?>&page=<?= $page-1 ?>">Sebelumnya</a></li>
+            <?php endif; ?>
+
+            <?php for($i=1; $i <= $totalPages; $i++): ?>
+              <li class="page-item <?= ($i==$page)?'active':'' ?>">
+                <a class="page-link" href="?tahun=<?= $tahun ?>&page=<?= $i ?>"><?= $i ?></a>
+              </li>
+            <?php endfor; ?>
+
+            <?php if($page < $totalPages): ?>
+              <li class="page-item"><a class="page-link" href="?tahun=<?= $tahun ?>&page=<?= $page+1 ?>">Berikutnya</a></li>
+            <?php endif; ?>
+          </ul>
+        </nav>
+      <?php endif; ?>
+    </main>
+  </div>
+</div>
+
+<footer class="bg-dark text-light text-center py-3 mt-5">
+  &copy; <?= date('Y') ?> DPD Gerakan Rakyat Kota Kediri
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
