@@ -1,8 +1,22 @@
 <?php
 require 'config.php';
 
-// Ambil semua berita
-$res = $conn->query("SELECT * FROM berita ORDER BY tanggal DESC");
+// Pagination
+$limit = 5; // jumlah berita per halaman
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if($page < 1) $page = 1;
+$offset = ($page - 1) * $limit;
+
+// Hitung total berita
+$totalRes = $conn->query("SELECT COUNT(*) as total FROM berita");
+$total = $totalRes->fetch_assoc()['total'];
+$totalPages = ceil($total / $limit);
+
+// Ambil berita sesuai halaman
+$stmt = $conn->prepare("SELECT * FROM berita ORDER BY tanggal DESC LIMIT ?,?");
+$stmt->bind_param("ii", $offset, $limit);
+$stmt->execute();
+$res = $stmt->get_result();
 ?>
 <!doctype html>
 <html lang="id">
@@ -22,7 +36,8 @@ $res = $conn->query("SELECT * FROM berita ORDER BY tanggal DESC");
 <div class="container my-5">
   <h2>Daftar Berita</h2>
   <hr>
-  <?php if($res->num_rows == 0): ?>
+
+  <?php if($total == 0): ?>
     <p>Belum ada berita.</p>
   <?php else: ?>
     <?php while($b=$res->fetch_assoc()): ?>
@@ -34,6 +49,36 @@ $res = $conn->query("SELECT * FROM berita ORDER BY tanggal DESC");
           <a href="berita_detail.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-primary">Baca Selengkapnya</a>
         </div>
       </div>
+    <?php endwhile; ?>
+
+    <!-- Pagination -->
+    <nav>
+      <ul class="pagination justify-content-center">
+        <?php if($page > 1): ?>
+          <li class="page-item"><a class="page-link" href="?page=<?= $page-1 ?>">Sebelumnya</a></li>
+        <?php endif; ?>
+
+        <?php for($i=1; $i <= $totalPages; $i++): ?>
+          <li class="page-item <?= ($i==$page)?'active':'' ?>">
+            <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+          </li>
+        <?php endfor; ?>
+
+        <?php if($page < $totalPages): ?>
+          <li class="page-item"><a class="page-link" href="?page=<?= $page+1 ?>">Berikutnya</a></li>
+        <?php endif; ?>
+      </ul>
+    </nav>
+  <?php endif; ?>
+</div>
+
+<footer class="bg-dark text-light text-center py-3 mt-5">
+  &copy; <?= date('Y') ?> DPD Gerakan Rakyat Kota Kediri
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
     <?php endwhile; ?>
   <?php endif; ?>
 </div>
