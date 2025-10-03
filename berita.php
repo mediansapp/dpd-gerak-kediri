@@ -45,7 +45,8 @@ $res = $conn->query("SELECT * FROM berita ORDER BY tanggal DESC");
         <td>
           <a href="berita_edit.php?id=<?= $r['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
           <a href="berita.php?delete=<?= $r['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus?')">Hapus</a>
-        </td>
+          <a href="berita_detail.php?id=<?= $r['id'] ?>" class="btn btn-sm btn-info" target="_blank">Lihat Publik</a>
+   </td>
       </tr>
     <?php endwhile; ?>
     </tbody>
