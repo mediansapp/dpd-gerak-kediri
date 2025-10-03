@@ -1,10 +1,9 @@
-
 <?php
 // config.php - sesuaikan kredensial database
 $DB_HOST = 'localhost';
 $DB_USER = 'root';
 $DB_PASS = '';
-$DB_NAME = 'dpd_gerakan_rakyat';
+$DB_NAME = 'db_dpd_kediri';
 
 $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 if ($conn->connect_error) { die("Koneksi gagal: " . $conn->connect_error); }
