@@ -1,69 +1,58 @@
 <?php
 require 'config.php';
 
-// --- Pencarian ---
+// --- Ambil daftar kategori unik ---
+$kategoriRes = $conn->query("SELECT DISTINCT kategori FROM berita ORDER BY kategori ASC");
+$kategoriList = [];
+while($row = $kategoriRes->fetch_assoc()){
+    $kategoriList[] = $row['kategori'];
+}
+
+// --- Pencarian & Filter ---
 $keyword = isset($_GET['q']) ? trim($_GET['q']) : "";
-if($keyword || $kategori){
-    $sql = "SELECT * FROM berita WHERE 1=1";
-    $params = [];
-    $types = "";
-
-    if($keyword){
-        $sql .= " AND (judul LIKE ? OR isi LIKE ?)";
-        $like = "%$keyword%";
-        $params[] = &$like;
-        $params[] = &$like;
-        $types .= "ss";
-    }
-    if($kategori){
-        $sql .= " AND kategori = ?";
-        $params[] = &$kategori;
-        $types .= "s";
-    }
-
-    $sqlTotal = str_replace("SELECT *","SELECT COUNT(*) as total",$sql);
-    $stmtTotal = $conn->prepare($sqlTotal);
-    if($params) call_user_func_array([$stmtTotal,"bind_param"], array_merge([$types], $params));
-    $stmtTotal->execute();
-    $total = $stmtTotal->get_result()->fetch_assoc()['total'];
-    $stmtTotal->close();
-
-    $sql .= " ORDER BY tanggal DESC LIMIT ?,?";
-    $params[] = &$offset;
-    $params[] = &$limit;
-    $types .= "ii";
-
-    $stmt = $conn->prepare($sql);
-    call_user_func_array([$stmt,"bind_param"], array_merge([$types], $params));
-} 
+$kategori = isset($_GET['kategori']) ? trim($_GET['kategori']) : "";
 
 // --- Pagination ---
-$limit = 5; // jumlah berita per halaman
+$limit = 5;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
-// Hitung total berita sesuai pencarian
-if($keyword){
-    $stmtTotal = $conn->prepare("SELECT COUNT(*) as total FROM berita WHERE judul LIKE ? OR isi LIKE ?");
-    $like = "%$keyword%";
-    $stmtTotal->bind_param("ss", $like, $like);
-    $stmtTotal->execute();
-    $total = $stmtTotal->get_result()->fetch_assoc()['total'];
-    $stmtTotal->close();
+// --- Query total ---
+$sqlBase = "FROM berita WHERE 1=1";
+$params = [];
+$types = "";
 
-    $stmt = $conn->prepare("SELECT * FROM berita WHERE judul LIKE ? OR isi LIKE ? ORDER BY tanggal DESC LIMIT ?,?");
-    $stmt->bind_param("ssii", $like, $like, $offset, $limit);
-} else {
-    $totalRes = $conn->query("SELECT COUNT(*) as total FROM berita");
-    $total = $totalRes->fetch_assoc()['total'];
-    $stmt = $conn->prepare("SELECT * FROM berita ORDER BY tanggal DESC LIMIT ?,?");
-    $stmt->bind_param("ii", $offset, $limit);
+if($keyword){
+    $sqlBase .= " AND (judul LIKE ? OR isi LIKE ?)";
+    $like = "%$keyword%";
+    $params[] = &$like;
+    $params[] = &$like;
+    $types .= "ss";
+}
+if($kategori){
+    $sqlBase .= " AND kategori = ?";
+    $params[] = &$kategori;
+    $types .= "s";
 }
 
+// Hitung total
+$stmtTotal = $conn->prepare("SELECT COUNT(*) as total ".$sqlBase);
+if($params) call_user_func_array([$stmtTotal,"bind_param"], array_merge([$types], $params));
+$stmtTotal->execute();
+$total = $stmtTotal->get_result()->fetch_assoc()['total'];
+$stmtTotal->close();
 $totalPages = ceil($total / $limit);
 
-// Eksekusi query
+// Ambil data berita
+$sql = "SELECT * ".$sqlBase." ORDER BY tanggal DESC LIMIT ?,?";
+$params2 = $params;
+$types2 = $types."ii";
+$params2[] = &$offset;
+$params2[] = &$limit;
+
+$stmt = $conn->prepare($sql);
+if($params2) call_user_func_array([$stmt,"bind_param"], array_merge([$types2], $params2));
 $stmt->execute();
 $res = $stmt->get_result();
 ?>
@@ -83,64 +72,75 @@ $res = $stmt->get_result();
 </nav>
 
 <div class="container my-5">
-  <h2>Daftar Berita</h2>
-  <hr>
-<?php
-$kategori = isset($_GET['kategori']) ? $_GET['kategori'] : "";
-?>
-<form method="get" class="mb-4 d-flex">
-  <input type="text" name="q" class="form-control me-2" placeholder="Cari berita..." value="<?= htmlspecialchars($keyword) ?>">
-  <select name="kategori" class="form-select me-2" style="max-width:200px;">
-    <option value="">Semua Kategori</option>
-    <option <?= $kategori=="Pendidikan"?"selected":"" ?>>Pendidikan</option>
-    <option <?= $kategori=="Ekonomi"?"selected":"" ?>>Ekonomi</option>
-    <option <?= $kategori=="Sosial"?"selected":"" ?>>Sosial</option>
-    <option <?= $kategori=="Politik"?"selected":"" ?>>Politik</option>
-    <option <?= $kategori=="Umum"?"selected":"" ?>>Umum</option>
-  </select>
-  <button type="submit" class="btn btn-primary">Cari</button>
-</form>
-
-  <!-- Form Pencarian -->
-  <form method="get" class="mb-4 d-flex">
-    <input type="text" name="q" class="form-control me-2" placeholder="Cari berita..." value="<?= htmlspecialchars($keyword) ?>">
-    <button type="submit" class="btn btn-primary">Cari</button>
-  </form>
-
-  <?php if($total == 0): ?>
-    <p>Tidak ada berita ditemukan.</p>
-  <?php else: ?>
-    <?php while($b=$res->fetch_assoc()): ?>
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title"><?= htmlspecialchars($b['judul']) ?></h5>
-          <small class="text-muted"><?= date("d M Y", strtotime($b['tanggal'])) ?> | <?= $b['kategori'] ?></small>
-          <small class="text-muted"><?= date("d M Y", strtotime($b['tanggal'])) ?> | <a href="kategori.php?kategori=<?= urlencode($b['kategori']) ?>" class="badge bg-info text-dark"><?= $b['kategori'] ?></a></small>
-            <p class="card-text mt-2"><?= substr(strip_tags($b['isi']),0,200) ?>...</p>
-          <a href="berita_detail.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-primary">Baca Selengkapnya</a>
-        </div>
-      </div>
-    <?php endwhile; ?>
-
-    <!-- Pagination -->
-    <nav>
-      <ul class="pagination justify-content-center">
-        <?php if($page > 1): ?>
-          <li class="page-item"><a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $page-1 ?>">Sebelumnya</a></li>
-        <?php endif; ?>
-
-        <?php for($i=1; $i <= $totalPages; $i++): ?>
-          <li class="page-item <?= ($i==$page)?'active':'' ?>">
-            <a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $i ?>"><?= $i ?></a>
+  <div class="row">
+    <!-- Sidebar -->
+    <aside class="col-md-3 mb-4">
+      <h5>Kategori</h5>
+      <ul class="list-group">
+        <li class="list-group-item <?= $kategori==""?'active':'' ?>">
+          <a href="berita_list.php" class="text-decoration-none <?= $kategori==""?'text-white':'' ?>">Semua</a>
+        </li>
+        <?php foreach($kategoriList as $kat): ?>
+          <li class="list-group-item <?= $kategori==$kat?'active':'' ?>">
+            <a href="berita_list.php?kategori=<?= urlencode($kat) ?>" class="text-decoration-none <?= $kategori==$kat?'text-white':'' ?>">
+              <?= $kat ?>
+            </a>
           </li>
-        <?php endfor; ?>
-
-        <?php if($page < $totalPages): ?>
-          <li class="page-item"><a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $page+1 ?>">Berikutnya</a></li>
-        <?php endif; ?>
+        <?php endforeach; ?>
       </ul>
-    </nav>
-  <?php endif; ?>
+    </aside>
+
+    <!-- Konten utama -->
+    <main class="col-md-9">
+      <h2>Daftar Berita</h2>
+      <hr>
+
+      <!-- Form Pencarian -->
+      <form method="get" class="mb-4 d-flex">
+        <input type="text" name="q" class="form-control me-2" placeholder="Cari berita..." value="<?= htmlspecialchars($keyword) ?>">
+        <?php if($kategori): ?>
+          <input type="hidden" name="kategori" value="<?= htmlspecialchars($kategori) ?>">
+        <?php endif; ?>
+        <button type="submit" class="btn btn-primary">Cari</button>
+      </form>
+
+      <?php if($total == 0): ?>
+        <p>Tidak ada berita ditemukan.</p>
+      <?php else: ?>
+        <?php while($b=$res->fetch_assoc()): ?>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title"><?= htmlspecialchars($b['judul']) ?></h5>
+              <small class="text-muted"><?= date("d M Y", strtotime($b['tanggal'])) ?> | 
+                <a href="berita_list.php?kategori=<?= urlencode($b['kategori']) ?>" class="badge bg-info text-dark"><?= $b['kategori'] ?></a>
+              </small>
+              <p class="card-text mt-2"><?= substr(strip_tags($b['isi']),0,200) ?>...</p>
+              <a href="berita_detail.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-primary">Baca Selengkapnya</a>
+            </div>
+          </div>
+        <?php endwhile; ?>
+
+        <!-- Pagination -->
+        <nav>
+          <ul class="pagination justify-content-center">
+            <?php if($page > 1): ?>
+              <li class="page-item"><a class="page-link" href="?q=<?= urlencode($keyword) ?>&kategori=<?= urlencode($kategori) ?>&page=<?= $page-1 ?>">Sebelumnya</a></li>
+            <?php endif; ?>
+
+            <?php for($i=1; $i <= $totalPages; $i++): ?>
+              <li class="page-item <?= ($i==$page)?'active':'' ?>">
+                <a class="page-link" href="?q=<?= urlencode($keyword) ?>&kategori=<?= urlencode($kategori) ?>&page=<?= $i ?>"><?= $i ?></a>
+              </li>
+            <?php endfor; ?>
+
+            <?php if($page < $totalPages): ?>
+              <li class="page-item"><a class="page-link" href="?q=<?= urlencode($keyword) ?>&kategori=<?= urlencode($kategori) ?>&page=<?= $page+1 ?>">Berikutnya</a></li>
+            <?php endif; ?>
+          </ul>
+        </nav>
+      <?php endif; ?>
+    </main>
+  </div>
 </div>
 
 <footer class="bg-dark text-light text-center py-3 mt-5">
