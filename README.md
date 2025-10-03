@@ -61,6 +61,7 @@ cd dpd-gerak-kediri
 
 ### 4. Konfigurasi `config.php`
 
+```
 <?php
 $host = "localhost";
 $user = "root";     // default user MySQL
@@ -71,7 +72,7 @@ if($conn->connect_error){
     die("Koneksi gagal: " . $conn->connect_error);
 }
 ?>
-
+```
 
 ### 5. Jalankan Aplikasi
 
