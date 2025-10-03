@@ -1,9 +1,9 @@
-## 📄 README.md
-
 # 🌐 Website DPD Gerakan Rakyat Kota Kediri
 
 Aplikasi website berbasis **PHP + MySQL** untuk organisasi **DPD Gerakan Rakyat Kota Kediri**.  
 Website ini berfungsi sebagai portal informasi publik dan sistem manajemen internal pengurus.
+
+---
 
 ## ✨ Fitur Utama
 - **Home Page** → Profil singkat & informasi organisasi.
@@ -23,22 +23,19 @@ Website ini berfungsi sebagai portal informasi publik dan sistem manajemen inter
   - CRUD kontak organisasi
   - Form publik untuk masyarakat
 
+---
+
 ## 📂 Struktur Folder
 
-dpd-gerak-kediri/
-│── config.php           # Konfigurasi database
-│── home.php             # Halaman utama
-│── berita_list.php      # Daftar berita + filter + pagination
-│── berita_detail.php    # Detail berita
-│── kategori.php         # Filter berita berdasarkan kategori
-│── arsip.php            # Arsip berita berdasarkan tahun
-│── pengurus.php         # Data pengurus
-│── program_kerja.php    # Program kerja & timeline
-│── kontak.php           # Kontak organisasi
-│
-├── /admin               # CRUD untuk admin (berita, pengurus, kontak, program kerja)
-├── /assets              # CSS, JS, gambar, logo
-└── /sql/create_database.sql   # File SQL database
+
+---
+
+## ⚙️ Instalasi Lokal
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/mediansapp/dpd-gerak-kediri.git
+cd dpd-gerak-kediri
 
 ## ⚙️ Instalasi Lokal
 
