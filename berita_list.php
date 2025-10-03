@@ -114,7 +114,7 @@ $kategori = isset($_GET['kategori']) ? $_GET['kategori'] : "";
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title"><?= htmlspecialchars($b['judul']) ?></h5>
-          <small class="text-muted"><?= date("d M Y", strtotime($b['tanggal'])) ?></small>
+          <small class="text-muted"><?= date("d M Y", strtotime($b['tanggal'])) ?> | <?= $b['kategori'] ?></small>
           <p class="card-text mt-2"><?= substr(strip_tags($b['isi']),0,200) ?>...</p>
           <a href="berita_detail.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-primary">Baca Selengkapnya</a>
         </div>
