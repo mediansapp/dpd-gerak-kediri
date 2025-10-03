@@ -1,20 +1,36 @@
 <?php
 require 'config.php';
 
-// Pagination
+// --- Pencarian ---
+$keyword = isset($_GET['q']) ? trim($_GET['q']) : "";
+
+// --- Pagination ---
 $limit = 5; // jumlah berita per halaman
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
-// Hitung total berita
-$totalRes = $conn->query("SELECT COUNT(*) as total FROM berita");
-$total = $totalRes->fetch_assoc()['total'];
+// Hitung total berita sesuai pencarian
+if($keyword){
+    $stmtTotal = $conn->prepare("SELECT COUNT(*) as total FROM berita WHERE judul LIKE ? OR isi LIKE ?");
+    $like = "%$keyword%";
+    $stmtTotal->bind_param("ss", $like, $like);
+    $stmtTotal->execute();
+    $total = $stmtTotal->get_result()->fetch_assoc()['total'];
+    $stmtTotal->close();
+
+    $stmt = $conn->prepare("SELECT * FROM berita WHERE judul LIKE ? OR isi LIKE ? ORDER BY tanggal DESC LIMIT ?,?");
+    $stmt->bind_param("ssii", $like, $like, $offset, $limit);
+} else {
+    $totalRes = $conn->query("SELECT COUNT(*) as total FROM berita");
+    $total = $totalRes->fetch_assoc()['total'];
+    $stmt = $conn->prepare("SELECT * FROM berita ORDER BY tanggal DESC LIMIT ?,?");
+    $stmt->bind_param("ii", $offset, $limit);
+}
+
 $totalPages = ceil($total / $limit);
 
-// Ambil berita sesuai halaman
-$stmt = $conn->prepare("SELECT * FROM berita ORDER BY tanggal DESC LIMIT ?,?");
-$stmt->bind_param("ii", $offset, $limit);
+// Eksekusi query
 $stmt->execute();
 $res = $stmt->get_result();
 ?>
@@ -37,8 +53,14 @@ $res = $stmt->get_result();
   <h2>Daftar Berita</h2>
   <hr>
 
+  <!-- Form Pencarian -->
+  <form method="get" class="mb-4 d-flex">
+    <input type="text" name="q" class="form-control me-2" placeholder="Cari berita..." value="<?= htmlspecialchars($keyword) ?>">
+    <button type="submit" class="btn btn-primary">Cari</button>
+  </form>
+
   <?php if($total == 0): ?>
-    <p>Belum ada berita.</p>
+    <p>Tidak ada berita ditemukan.</p>
   <?php else: ?>
     <?php while($b=$res->fetch_assoc()): ?>
       <div class="card mb-3">
@@ -55,17 +77,17 @@ $res = $stmt->get_result();
     <nav>
       <ul class="pagination justify-content-center">
         <?php if($page > 1): ?>
-          <li class="page-item"><a class="page-link" href="?page=<?= $page-1 ?>">Sebelumnya</a></li>
+          <li class="page-item"><a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $page-1 ?>">Sebelumnya</a></li>
         <?php endif; ?>
 
         <?php for($i=1; $i <= $totalPages; $i++): ?>
           <li class="page-item <?= ($i==$page)?'active':'' ?>">
-            <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+            <a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $i ?>"><?= $i ?></a>
           </li>
         <?php endfor; ?>
 
         <?php if($page < $totalPages): ?>
-          <li class="page-item"><a class="page-link" href="?page=<?= $page+1 ?>">Berikutnya</a></li>
+          <li class="page-item"><a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $page+1 ?>">Berikutnya</a></li>
         <?php endif; ?>
       </ul>
     </nav>
