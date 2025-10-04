@@ -72,7 +72,7 @@ INSERT INTO berita (kategori,judul, isi, tanggal) VALUES
 
 -- sample pengurus (sesuai gambar Anda)
 INSERT INTO pengurus (nama, jabatan, no_identitas, no_hp, foto) VALUES
-([H. Dawud Syamsuri, M.Pdi], [Ketua Dewan Penasihat], [000000000000], [000000000000,[NULL]),
+('H. Dawud Syamsuri, M.Pdi', 'Ketua Dewan Penasihat', '000000000000', '000000000000',[NULL]),
 ('Shokhib, SH', 'Sekretaris Dewan Penasihat', '0822-3416-5075', '0822-3416-5075',NULL),
 ('Dian Ermawan, SE', 'Ketua DPD', '081235922332', '081235922332',NULL),
 ('Sunanto', 'Wakil Ketua', '0812-3401-8354', '0812-3401-8354',NULL),
