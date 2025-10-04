@@ -1,8 +1,10 @@
 <?php
 session_start();
 require 'config.php';
-if(!isset($_SESSION['admin_id'])){ header('Location: login.php'); exit; }
-
+if(!isset($_SESSION['user_id'])){
+    header("Location: login.php");
+    exit;
+}
 // Hapus data
 if(isset($_GET['delete'])){
     $id = (int)$_GET['delete'];
@@ -39,7 +41,7 @@ $result = $conn->query("SELECT * FROM pengurus ORDER BY id DESC");
   <a href="index.php" class="btn btn-secondary mb-3">&laquo; Dashboard</a>
   <h3>Daftar Pengurus</h3>
   <a href="pengurus_add.php" class="btn btn-success mb-3">Tambah Pengurus</a>
-
+  <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
   <div class="table-responsive">
   <table class="table table-bordered">
     <thead><tr>
