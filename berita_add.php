@@ -1,9 +1,13 @@
 <?php
 session_start();
 require 'config.php';
-if(!isset($_SESSION['admin_id'])){ header('Location: login.php'); exit; }
 
-$err=''; $ok=false;
+if(!isset($_SESSION['user_id'])){
+    header("Location: login.php");
+    exit;
+}
+?>
+
 if($_SERVER['REQUEST_METHOD']==='POST'){
     $judul=trim($_POST['judul']);
     $isi=trim($_POST['isi']);
