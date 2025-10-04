@@ -34,6 +34,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 <body>
 <div class="container my-4">
   <a href="berita.php" class="btn btn-secondary mb-3">&laquo; Kembali</a>
+  <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
+
   <h3>Tambah Berita</h3>
   <?php if($err): ?><div class="alert alert-danger"><?= $err ?></div><?php endif; ?>
   <?php if($ok): ?><div class="alert alert-success">Berhasil disimpan.</div><?php endif; ?>
