@@ -1,6 +1,6 @@
 -- create_database.sql
-CREATE DATABASE IF NOT EXISTS db_dpd_kediri CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE db_dpd_kediri;
+CREATE DATABASE IF NOT EXISTS b17_40091018_db_dpd_kediri CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE b17_40091018_db_dpd_kediri;
 
 -- tabel admin
 CREATE TABLE IF NOT EXISTS admin (
