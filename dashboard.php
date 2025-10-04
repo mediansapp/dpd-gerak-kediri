@@ -4,6 +4,8 @@ if(!isset($_SESSION['user_id'])){
   header("Location: login.php");
   exit;
 }
+  <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
+
 ?>
 <!doctype html>
 <html lang="id">
@@ -18,4 +20,7 @@ if(!isset($_SESSION['user_id'])){
     <a class="navbar-brand" href="#">DPD Gerakan Rakyat Kota Kediri</a>
     <div class="d-flex">
       <span class="navbar-text text-white me-3">Halo, <?= htmlspecialchars($_SESSION['nama_lengkap']) ?></span>
-      <a href="
+      <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
+    </div>
+  </div>
+</nav>
