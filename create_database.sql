@@ -47,6 +47,17 @@ CREATE TABLE IF NOT EXISTS program_kerja (
     tahun_selesai YEAR NOT NULL,
     keterangan TEXT
 );
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) UNIQUE,
+  password VARCHAR(255),
+  nama_lengkap VARCHAR(100),
+  level ENUM('admin','pengurus') DEFAULT 'admin'
+);
+
+-- Contoh akun admin (password = admin123)
+INSERT INTO users (username, password, nama_lengkap, level)
+VALUES ('admin', MD5('admin123'), 'Administrator', 'admin');
 
 -- sample admin (username: admin, password: admin123)
 INSERT INTO admin (username, password_hash) VALUES
