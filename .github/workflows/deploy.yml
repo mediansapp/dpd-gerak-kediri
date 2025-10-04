@@ -1,0 +1,29 @@
+name: 🚀 Deploy ke Hosting via FTP
+
+on:
+  push:
+    branches:
+      - main   # atau ganti 'master' jika branch utama Anda berbeda
+
+jobs:
+  ftp-deploy:
+    name: Upload ke Hosting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 📂 Sinkronisasi File via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /htdocs/    # ubah sesuai folder di hosting Anda
+          local-dir: ./
+          exclude: |
+            **/.git*
+            **/.github*
+            **/sql/*
+            **/README.md
